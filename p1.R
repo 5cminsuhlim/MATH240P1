@@ -1,11 +1,11 @@
 ## project 1 scripts ##
 
 ## overarching Q:
-## How does GDP affect life span globally (2000-2016)? (by region)
+## How does GDP affect life span globally (2014)? (by region)
 ## 
 ## More specific Q:
-## How does GDP affect life span of women globally (2000-2016)?
-## How does GDP affect life span of men globally (2000-2016)?
+## How does GDP affect life span of women globally (2014)?
+## How does GDP affect life span of men globally (2014)?
 ##
 ##
 
@@ -15,6 +15,8 @@ library(tidyverse)
 library(readxl)
 library(maps)
 library(scales)
+library(ggpmisc)
+
 
 ##gdp %>%
 ## select(everything()) %>% 
@@ -52,3 +54,136 @@ gdp2014 <- select(gdp, Country, X2014)
 
 ## merge
 merged2014 <- merge(life, gdp2014, by = 'Country')
+
+
+## split based on sex
+both <- filter(merged2014, Sex.Code == 'BTSX')
+
+male <- filter(merged2014, Sex.Code == 'MLE')
+
+female <- filter(merged2014, Sex.Code == 'FMLE')
+
+
+## stat_poly_eq SOURCE: 
+## https://stackoverflow.com/questions/7549694/add-regression-line-equation-and-r2-on-graph
+
+## analysis both
+lm.both = lm(Mort.Rate ~ X2014, data = both)
+summary(lm.both)
+
+## linear plot
+ggplot(data = both, aes(x = X2014, y = Mort.Rate)) +
+        geom_point(color = 'darkgreen', size = 0.7) +
+        geom_smooth(method = lm, se = TRUE, fullrange = TRUE, level = 0.95,
+                    color = 'darkred', fill = 'blue') +
+        stat_poly_eq(formula = y ~ x, eq.with.lhs = "italic(hat(y))~`=`~",
+                     aes(label = paste(..eq.label.., ..rr.label.., 
+                                       sep = "*plain(\",\")~~~")),
+                     parse = TRUE) +
+        labs(title = 'Adult Mortality Rate according to Annual GDP Growth (2014)', 
+             x = 'Annual GDP Growth',
+             y = 'Adult Mortality Rate') + 
+        theme(axis.title.x = element_text(), 
+              axis.title.y.left = element_text(vjust = 3),
+              axis.title.y.right = element_text(vjust = 3),
+              plot.title = element_text(hjust = 0.5))
+
+## residual plot
+ggplot(lm.both, aes(x = .fitted, y = .resid)) + 
+        geom_point() +
+        geom_hline(yintercept = 0, color = 'red')
+
+## qq plot
+ggplot(both, aes(sample = Mort.Rate)) + 
+        stat_qq() +
+        stat_qq_line(alpha = .7, color = 'red')
+
+
+## analysis male
+lm.male = lm(Mort.Rate ~ X2014, data = male)
+summary(lm.male)
+
+## linear plot
+ggplot(data = male, aes(x = X2014, y = Mort.Rate)) +
+        geom_point(color = 'darkgreen', size = 0.7) +
+        geom_smooth(method = lm, se = TRUE, fullrange = TRUE, level = 0.95,
+                    color = 'darkred', fill = 'blue') +
+        stat_poly_eq(formula = y ~ x, eq.with.lhs = "italic(hat(y))~`=`~",
+                     aes(label = paste(..eq.label.., ..rr.label.., 
+                                       sep = "*plain(\",\")~~~")),
+                     parse = TRUE) +
+        labs(title = 'Adult Male Mortality Rate according to Annual GDP Growth (2014)', 
+             x = 'Annual GDP Growth',
+             y = 'Adult Male Mortality Rate') + 
+        theme(axis.title.x = element_text(), 
+              axis.title.y.left = element_text(vjust = 3),
+              axis.title.y.right = element_text(vjust = 3),
+              plot.title = element_text(hjust = 0.5))
+
+## residual plot
+ggplot(lm.male, aes(x = .fitted, y = .resid)) + 
+        geom_point() +
+        geom_hline(yintercept = 0, color = 'red')
+
+## qq plot
+ggplot(male, aes(sample = Mort.Rate)) + 
+        stat_qq() +
+        stat_qq_line(alpha = .7, color = 'red')
+
+
+## analysis female
+lm.female = lm(Mort.Rate ~ X2014, data = female)
+summary(lm.female)
+
+## linear plot
+ggplot(data = female, aes(x = X2014, y = Mort.Rate)) +
+        geom_point(color = 'darkgreen', size = 0.7) +
+        geom_smooth(method = lm, se = TRUE, fullrange = TRUE, level = 0.95,
+                    color = 'darkred', fill = 'blue') +
+        stat_poly_eq(formula = y ~ x, eq.with.lhs = "italic(hat(y))~`=`~",
+                     aes(label = paste(..eq.label.., ..rr.label.., 
+                                       sep = "*plain(\",\")~~~")),
+                     parse = TRUE) +
+        labs(title = 'Adult Female Mortality Rate according to Annual GDP Growth (2014)', 
+             x = 'Annual GDP Growth',
+             y = 'Adult Female Mortality Rate') + 
+        theme(axis.title.x = element_text(), 
+              axis.title.y.left = element_text(vjust = 3),
+              axis.title.y.right = element_text(vjust = 3),
+              plot.title = element_text(hjust = 0.5))
+
+## residual plot
+ggplot(lm.female, aes(x = .fitted, y = .resid)) + 
+        geom_point() +
+        geom_hline(yintercept = 0, color = 'red')
+
+## qq plot
+ggplot(female, aes(sample = Mort.Rate)) + 
+        stat_qq() +
+        stat_qq_line(alpha = .7, color = 'red')
+
+
+## all together to see trends / differences side-by-side
+## linear plot
+ggplot(data = merged2014, aes(x = X2014, y = Mort.Rate)) +
+        geom_point(color = 'darkgreen', size = 0.7) +
+        geom_smooth(method = lm, se = TRUE, fullrange = TRUE, level = 0.95,
+                    color = 'darkred', fill = 'blue') +
+        stat_poly_eq(formula = y ~ x, eq.with.lhs = "italic(hat(y))~`=`~",
+                     aes(label = paste(..eq.label.., ..rr.label.., 
+                                       sep = "*plain(\",\")~~~")),
+                     parse = TRUE) +
+        labs(title = 'Adult Mortality Rate according to Annual GDP Growth (2014)', 
+             x = 'Annual GDP Growth',
+             y = 'Adult Mortality Rate') + 
+        theme(axis.title.x = element_text(), 
+              axis.title.y.left = element_text(vjust = 3),
+              axis.title.y.right = element_text(vjust = 3),
+              plot.title = element_text(hjust = 0.5)) +
+        facet_wrap(~Sex.Code)
+
+## qq plot
+ggplot(merged2014, aes(sample = Mort.Rate)) + 
+        stat_qq() +
+        stat_qq_line(alpha = .7, color = 'red') +
+        facet_wrap(~Sex.Code)
