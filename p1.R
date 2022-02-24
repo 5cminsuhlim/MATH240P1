@@ -9,6 +9,15 @@
 ##
 ##
 
+## REFERENCES
+## 
+## stat_poly_eq SOURCE: 
+## https://stackoverflow.com/questions/7549694/add-regression-line-equation-and-r2-on-graph
+##
+## cuberoot function SOURCE:
+## https://stat.ethz.ch/pipermail/r-help/2004-April/050165.html
+##
+##
 
 ## packages
 library(tidyverse)
@@ -97,6 +106,8 @@ qqline(both.lm$residuals, col = 'red')
 
 ## TRANSFORMATION 
 ## CUBEROOT X
+
+## 
 cuberoot <- function(x)sign(x)*abs(x)^(1/3)
 
 both <- mutate(both, X2014.CubeRoot = cuberoot(X2014))
