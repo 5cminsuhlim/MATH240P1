@@ -27,12 +27,12 @@ library(ggpmisc)
 
 ##gdp %>%
 ## select(everything()) %>% 
-## summarise_all(funs(sum(is.na(.))))
+## summarize_all(funs(sum(is.na(.))))
 ##
 ## Country X2000 X2001 X2002 X2003 X2004 X2005 X2006 X2007 X2008 X2009 X2010 X2011 X2012 X2013
-## 0    27    22    21    16    16    15    15    14    15    13    13    13    13    13
+## 0       19    18    13    13    13    13    12    12    11    11    10    8     9     8
 ## X2014 X2015 X2016
-## 11    12    12
+## 8     9     10
 
 
 
@@ -51,12 +51,14 @@ life <- select(life, Indicator, ParentLocationCode:FactValueNumeric) %>%
 
 
 ## clean gdp -- annual gdp growth
-gdp <- read.csv('./data/GDP.csv', skip = 4)
+#gdp <- read.csv('./data/GDP.csv', skip = 4)
+gdp <- read.csv('./data/GDP_Updated.csv', skip = 4)
 
 gdp <- select(gdp, Country.Name, X2000:X2016) %>%
         rename(Country = Country.Name)
 
 gdp2014 <- select(gdp, Country, X2014)
+
 
 
 ## merge
@@ -105,17 +107,17 @@ qqnorm(both.lm$residuals)
 qqline(both.lm$residuals, col = 'red')
 
 ## TRANSFORMATION 
-## CUBEROOT X
+## LOG_10 X
 
 ## 
-cuberoot <- function(x)sign(x)*abs(x)^(1/3)
+## cuberoot <- function(x)sign(x)*abs(x)^(1/3)
 
-both <- mutate(both, X2014.CubeRoot = cuberoot(X2014))
-both.lm.cubertX <- lm(Mort.Rate ~ X2014.CubeRoot, data = both)
-summary(both.lm.cubeX)
+both <- mutate(both, X2014.log10 = log10(X2014)) #cuberoot(X2014))
+both.lm.logX <- lm(Mort.Rate ~ X2014.log10, data = both)
+summary(both.lm.logX)
 
 ## linear plot
-ggplot(data = both, aes(x = X2014.CubeRoot, y = Mort.Rate)) +
+ggplot(data = both, aes(x = X2014.log10, y = Mort.Rate)) +
         geom_point(color = 'darkgreen', size = 0.7) +
         geom_smooth(method = lm, se = TRUE, fullrange = TRUE, level = 0.95,
                     color = 'darkred', fill = 'blue') +
@@ -132,13 +134,13 @@ ggplot(data = both, aes(x = X2014.CubeRoot, y = Mort.Rate)) +
               plot.title = element_text(hjust = 0.5))
 
 ## residuals vs fitted values
-plot(both.lm.cubertX$fitted.values, both.lm.cubertX$residuals)
+plot(both.lm.logX$fitted.values, both.lm.logX$residuals)
 abline(0,0, col = 'red')
 
 ## histogram and qqplot of residuals
-hist(both.lm.cubertX$residuals)
-qqnorm(both.lm.cubertX$residuals)
-qqline(both.lm.cubertX$residuals, col = 'red')
+hist(both.lm.logX$residuals)
+qqnorm(both.lm.logX$residuals)
+qqline(both.lm.logX$residuals, col = 'red')
 
 
 ## TRANSFORMATION 
