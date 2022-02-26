@@ -1,0 +1,71 @@
+---
+title: "Project 1"
+author: "Eric Lim, Aidan Pizzo, Anastasia Nesterova"
+date: "February 28, 2022"
+output: pdf_document
+---
+
+## Abstract
+Annual Gross Domestic Product (GDP) Growth measures an entity’s economic output, while Adult Mortality Rate, the percentage of people that die between the ages of 15 and 60, is a relevant statistic in quantifying overall health by country. For our project, we analyzed the relation between a country’s GDP growth and the overall adult mortality rate during the year 2014 to learn more about the relation between a country’s economic growth and its citizens’ health. Additionally, we separated the Adult Mortality Rate data by sex, looking at the relationship betwee GDP and Adult Mortality rate for only men or only women. Using simple linear regression, we found estimator values of b0= 0.002994  and b1= 0.159656 while analyzing overall adult mortality rate. In addressing our model assumptions, we did not find enough evidence of linearity or homoscedasticity in a plot of X (Annual GDP Growth) vs residuals, leading us to transform our plot using the cube root of Annual GDP Growth and square root of the Adult Mortality Rate.
+
+## Introduction
+[DESCRIPTION OF THE PROBLEM?] The Annual GDP Growth data was obtained from the World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG) and the Adult Mortality Rate data is from the World Health Organization (https://www.who.int/data/gho/data/indicators/indicator-details/GHO/adult-mortality-rate-(probability-of-dying-between-15-and-60-years-per-1000-population)). The datasets contain values for many years, but we filtered for the year 2014, because it was one of the most recent years that contained the least “NA” entries. These datasets were merged by country, yielding our dataset with the Annual GDP Growth (explanatory variable) and Adult Mortality Rate (response variable) in 2014 for 157 countries. Some questions we aimed to address are: Is there evidence of a linear relationship between a country’s 2014 Annual GDP Growth and its Adult Mortality Rate for the same year? Is there any change in the Linear Regression model when the Adult Mortality Rate is divided into male and female?
+
+```{r}
+## packages
+library(tidyverse)
+library(readxl)
+library(ggpmisc)
+
+## clean life -- adult mortality rate
+life <- read.csv('./data/life.csv')
+
+life <- select(life, Indicator, ParentLocationCode:FactValueNumeric) %>%
+        select(-c(Location.type, Period.type, IsLatestYear:Dim1, 
+                  Dim2.type:FactValueNumericPrefix)) %>%
+        rename(Country = Location, Mort.Per.1k = FactValueNumeric,
+               Country.Code = SpatialDimValueCode, Region = ParentLocation,
+               Region.Code = ParentLocationCode, Sex.Code = Dim1ValueCode) %>%
+        mutate(Mort.Rate = Mort.Per.1k / 1000) %>%
+        select(-Mort.Per.1k) %>%
+        filter(Period == 2014)
+
+## clean gdp -- annual gdp growth
+gdp <- read.csv('./data/GDP.csv', skip = 4)
+
+gdp <- select(gdp, Country.Name, X2000:X2016) %>%
+        rename(Country = Country.Name)
+
+gdp2014 <- select(gdp, Country, X2014)
+
+## merge
+merged2014 <- merge(life, gdp2014, by = 'Country')
+
+## split based on sex
+both <- filter(merged2014, Sex.Code == 'BTSX') %>%
+        drop_na()
+
+male <- filter(merged2014, Sex.Code == 'MLE') %>%
+        drop_na()
+
+female <- filter(merged2014, Sex.Code == 'FMLE') %>%
+        drop_na()
+```
+
+## Methods
+[Paste Methods Section Here]
+
+
+
+## Results
+[Paste Results Section Here]
+
+```{r}
+
+```
+
+
+## Discussion/Conclusions
+[Paste D/C Section Here]
+
+
