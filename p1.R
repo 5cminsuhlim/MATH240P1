@@ -106,6 +106,15 @@ hist(both.lm$residuals)
 qqnorm(both.lm$residuals)
 qqline(both.lm$residuals, col = 'red')
 
+
+## normality test
+shapiro.test(both.lm$residuals)
+
+
+##confidence interval
+confint(both.lm)
+
+
 ## TRANSFORMATION 
 ## LOG_10 X
 
@@ -141,6 +150,15 @@ abline(0,0, col = 'red')
 hist(both.lm.logX$residuals)
 qqnorm(both.lm.logX$residuals)
 qqline(both.lm.logX$residuals, col = 'red')
+
+
+## normality test
+shapiro.test(both.lm.logX$residuals)
+
+
+##confidence interval
+confint(both.lm.logX)
+
 
 
 ## TRANSFORMATION 
