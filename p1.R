@@ -63,6 +63,7 @@ gdp2014 <- select(gdp, Country, X2014)
 
 ## merge
 merged2014 <- merge(life, gdp2014, by = 'Country')
+merged2014 <- select(merged2014, Country, Sex.Code, Mort.Rate, X2014)
 
 
 ## split based on sex
@@ -194,6 +195,9 @@ qqline(both.lm.cubertX.sqrtY$residuals, col = 'red')
 
 
 
+
+
+
 ## analysis male
 male.lm = lm(Mort.Rate ~ X2014, data = male)
 summary(male.lm)
@@ -223,6 +227,11 @@ abline(0,0, col = 'red')
 hist(male.lm$residuals)
 qqnorm(male.lm$residuals)
 qqline(male.lm$residuals, col = 'red')
+
+
+
+
+
 
 
 ## TRANSFORMATION 
@@ -288,6 +297,10 @@ abline(0,0, col = 'red')
 hist(male.lm.cubertX.sqrtY$residuals)
 qqnorm(male.lm.cubertX.sqrtY$residuals)
 qqline(male.lm.cubertX.sqrtY$residuals, col = 'red')
+
+
+
+
 
 
 
