@@ -57,15 +57,15 @@ head(both)
 ```
 When creating a linear regression model for this dataset, the data is very skewed.
 ```{r}
-ggplot(data = both, aes(x = X2014.log10, y = Mort.Rate)) +
-+     geom_point(color = 'darkgreen', size = 0.7)+
-+     labs(title = 'Adult Mortality Rate according to Annual GDP Growth (2014)', 
-+          x = 'Annual GDP Growth',
-+          y = 'Adult Mortality Rate') + 
-+     theme(axis.title.x = element_text(), 
-+           axis.title.y.left = element_text(vjust = 3),
-+           axis.title.y.right = element_text(vjust = 3),
-+           plot.title = element_text(hjust = 0.5))
+# ggplot(data = both, aes(x = X2014.log10, y = Mort.Rate)) +
+#      geom_point(color = 'darkgreen', size = 0.7)+
+#      labs(title = 'Adult Mortality Rate according to Annual GDP Growth (2014)', 
+#           x = 'Annual GDP Growth',
+#           y = 'Adult Mortality Rate') + 
+#      theme(axis.title.x = element_text(), 
+#            axis.title.y.left = element_text(vjust = 3),
+#            axis.title.y.right = element_text(vjust = 3),
+#            plot.title = element_text(hjust = 0.5))
 ```
 In verifying the model assumptions, we failed to find evidence of linearity in both the X vs Y and X vs residuals plots. The plot of fitted X values vs residuals had a horizontal cone shape that did not strongly display linearity between the X and Y variables. 
 ```{r}
