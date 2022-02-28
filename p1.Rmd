@@ -55,7 +55,11 @@ female <- filter(merged2014, Sex.Code == 'FMLE') %>%
 ## Methods
 [Paste Methods Section Here]
 
+<center>
 
+H_0
+
+</center>
 
 ## Results
 [Paste Results Section Here]
