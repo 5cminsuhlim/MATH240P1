@@ -147,6 +147,9 @@ ggplot(data = both, aes(x = X2014.log10, y = Mort.Rate)) +
 plot(both.lm.logX$fitted.values, both.lm.logX$residuals)
 abline(0,0, col = 'red')
 
+## independence
+plot(merged2014$Mort.Rate, type="b")
+
 ## histogram and qqplot of residuals
 hist(both.lm.logX$residuals)
 qqnorm(both.lm.logX$residuals)
