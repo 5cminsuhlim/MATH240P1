@@ -2,14 +2,16 @@
 title: "Project 1"
 author: "Eric Lim, Aidan Pizzo, Anastasia Nesterova"
 date: "February 28, 2022"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ## Abstract
-Annual Gross Domestic Product (GDP) measures an entity’s economic output, while Adult Mortality Rate, the percentage of people that die between the ages of 15 and 60, is a relevant statistic in quantifying overall health by country. For our project, we analyzed the relation between a country’s GDP  (in current USD) and the overall adult mortality rate during the year 2014 to learn more about the relation between a country’s economic growth and its citizens’ health. After initially failing to find evidence of linearity between the variables, we transformed the GDP data using log base 10. Using simple linear regression, we found estimator values of b0= 0.628  and b1= -0.043 while analyzing overall adult mortality rate, indicating as the GDP increases by 1 log base 10, the adult mortality rate decreases by 0.043/100 = 0.004. This decrease represents 4 less people dying between the ages of 15 and 60 per 1000 people.
+Annual Gross Domestic Product (GDP) measures an entity’s economic output, while Adult Mortality Rate, the percentage of people that die between the ages of 15 and 60, is a relevant statistic in quantifying overall health by country. For our project, we analyzed the relation between a country’s GDP (in current USD) and the overall adult mortality rate during the year 2014 to learn more about the relation between a country’s economic growth and its citizens’ health. After initially failing to find evidence of linearity between the variables, we transformed the GDP data using log base 10. Using simple linear regression, we found estimator values of b0= 0.628  and b1= -0.043 while analyzing overall adult mortality rate, indicating as the GDP increases by 1 log base 10, the adult mortality rate decreases by 0.043/100 = 0.004. This decrease represents 4 less people dying between the ages of 15 and 60 per 1000 people.
 
 ## Introduction
-In analyzing the relationship between a country’s economic standing and health of their citizens, we compiled data on various countries’ Annual GDP, as well as the corresponding Adult Mortality Rate. The Annual GDP data was obtained from the World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD) and the Adult Mortality Rate data is from the World Health Organization (https://www.who.int/data/gho/data/indicators/indicator-details/GHO/adult-mortality-rate-(probability-of-dying-between-15-and-60-years-per-1000-population)). The datasets contain values for many years, but we filtered for the year 2014, because it was one of the most recent years that contained the least “NA” entries. These datasets were merged by country, yielding our dataset with the Annual GDP Growth (explanatory variable) and Adult Mortality Rate (response variable) in 2014 for 158 countries. Some questions we aimed to address are: Is there evidence of a linear relationship between a country’s 2014 Annual GDP Growth and its Adult Mortality Rate for the same year? What is the expected Adult Mortality Rate for a country with an Annual GDP of $5 billion USD? Is there any change in the Linear Regression model when the Adult Mortality Rate is divided into male and female?
+In analyzing the relationship between a country’s economic standing and health of their citizens, we compiled data on various countries’ Annual GDP, as well as the corresponding Adult Mortality Rate. The Annual GDP data was obtained from the World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD) and the Adult Mortality Rate data is from the World Health Organization (https://www.who.int/data/gho/data/indicators/indicator-details/GHO/adult-mortality-rate-(probability-of-dying-between-15-and-60-years-per-1000-population)). The datasets contain values for many years, but we filtered for the year 2014, because it was one of the most recent years that contained the least “NA” entries. These datasets were merged by country, yielding our dataset with the Annual GDP (explanatory variable) and Adult Mortality Rate (response variable) in 2014 for 158 countries. Some questions we aimed to address are: Is there evidence of a linear relationship between a country’s 2014 Annual GDP and its Adult Mortality Rate for the same year? What is the expected Adult Mortality Rate for a country with an Annual GDP of $5 billion USD? 
 
 ```{r}
 ## packages
@@ -30,7 +32,7 @@ life <- select(life, Indicator, ParentLocationCode:FactValueNumeric) %>%
         select(-Mort.Per.1k) %>%
         filter(Period == 2014)
 
-## clean gdp -- annual gdp growth
+## clean gdp -- annual gdp
 gdp <- read.csv('./data/GDP_Updated.csv', skip = 4)
 
 gdp <- select(gdp, Country.Name, X2000:X2016) %>%
@@ -42,11 +44,11 @@ gdp2014 <- select(gdp, Country, X2014)
 merged2014 <- merge(life, gdp2014, by = 'Country')
 merged2014 <- select(merged2014, Country, Sex.Code, Mort.Rate, X2014)
 
-## split based on sex
+## obtain data for both sexes
 both <- filter(merged2014, Sex.Code == 'BTSX') %>%
         drop_na()
 
-## analysis both
+## analysis
 both.lm <- lm(Mort.Rate ~ X2014, data = both)
 ```
 
@@ -55,26 +57,41 @@ Our merged dataset contains the Adult Mortality Rate (Mort.Rate) and GDP 2014 (X
 ```{r}
 head(both)
 ```
+
 When creating a linear regression model for this dataset, the data is very skewed.
 ```{r}
-# ggplot(data = both, aes(x = X2014.log10, y = Mort.Rate)) +
-#      geom_point(color = 'darkgreen', size = 0.7)+
-#      labs(title = 'Adult Mortality Rate according to Annual GDP Growth (2014)', 
-#           x = 'Annual GDP Growth',
-#           y = 'Adult Mortality Rate') + 
-#      theme(axis.title.x = element_text(), 
-#            axis.title.y.left = element_text(vjust = 3),
-#            axis.title.y.right = element_text(vjust = 3),
-#            plot.title = element_text(hjust = 0.5))
+## 
+## stat_poly_eq SOURCE: 
+## https://stackoverflow.com/questions/7549694/add-regression-line-equation-and-r2-on-graph
+##
+
+ggplot(data = both, aes(x = X2014, y = Mort.Rate)) +
+        geom_point(color = 'darkgreen', size = 0.7) +
+        geom_smooth(method = lm, se = TRUE, fullrange = TRUE, level = 0.95,
+                    color = 'darkred', fill = 'blue') +
+        stat_poly_eq(formula = y ~ x, eq.with.lhs = "italic(hat(y))~`=`~",
+                     aes(label = paste(..eq.label.., ..rr.label.., 
+                                       sep = "*plain(\",\")~~~")),
+                     parse = TRUE) +
+        labs(title = 'Adult Mortality Rate according to Annual GDP (2014)', 
+             x = 'Annual GDP',
+             y = 'Adult Mortality Rate') + 
+        theme(axis.title.x = element_text(), 
+              axis.title.y.left = element_text(vjust = 3),
+              axis.title.y.right = element_text(vjust = 3),
+              plot.title = element_text(hjust = 0.5))
 ```
+
 In verifying the model assumptions, we failed to find evidence of linearity in both the X vs Y and X vs residuals plots. The plot of fitted X values vs residuals had a horizontal cone shape that did not strongly display linearity between the X and Y variables. 
 ```{r}
 ## residuals vs fitted values
 plot(both.lm$fitted.values, both.lm$residuals)
 abline(0,0, col = 'red')
 ```
+
 Thus, we decided to transform the GDP variable by log base 10. After doing so, both plots showed stronger evidence of linearity. 
 ```{r}
+## transformation log_10
 both <- mutate(both, X2014.log10 = log10(X2014))
 both.lm.logX <- lm(Mort.Rate ~ X2014.log10, data = both)
 
@@ -86,8 +103,8 @@ ggplot(data = both, aes(x = X2014.log10, y = Mort.Rate)) +
                      aes(label = paste(..eq.label.., ..rr.label.., 
                                        sep = "*plain(\",\")~~~")),
                      parse = TRUE) +
-        labs(title = 'Adult Mortality Rate according to Annual GDP Growth (2014)', 
-             x = 'Annual GDP Growth',
+        labs(title = 'Adult Mortality Rate according to Annual GDP (2014)', 
+             x = 'Annual GDP',
              y = 'Adult Mortality Rate') + 
         theme(axis.title.x = element_text(), 
               axis.title.y.left = element_text(vjust = 3),
@@ -98,13 +115,15 @@ ggplot(data = both, aes(x = X2014.log10, y = Mort.Rate)) +
 plot(both.lm.logX$fitted.values, both.lm.logX$residuals)
 abline(0,0, col = 'red')
 ```
+
 The plot of X and residuals has a slight increase in variance as X increases, but for the most part the plot is an amorphous cloud of points. This provides evidence for both linearity and homoscedasticity.
 There is no identifiable pattern in the index plot of the mortality rate, which displays evidence for independence.
 ```{r}
 ## index plot - independence
 plot(merged2014$Mort.Rate, type="b")
 ```
-The histogram of the residuals appears to have a normal distribution. The qqplot of the residuals has a slight deviation from linearity, but the overall pattern is linear. The result of the Shapiro Wilk test is a p-value of 2.319e-07, however, which is evidence that the data was not collected from a normal distribution, which undermines the assumption of normalcy.
+
+The histogram of the residuals appears to have a normal distribution. The qqplot of the residuals has a slight deviation from linearity, but the overall pattern is linear. The result of the Shapiro-Wilk test is a p-value of 2.319e-07, however, which is evidence that the data was not collected from a normal distribution, which undermines the assumption of normalcy.
 ```{r}
 ## histogram and qqplot of residuals
 hist(both.lm.logX$residuals)
@@ -114,7 +133,9 @@ qqline(both.lm.logX$residuals, col = 'red')
 ## normality test
 shapiro.test(both.lm.logX$residuals)
 ```
-We constructed the following hypothesis test to determine whether there is a linear relationship: H~0: b1 = 0, HA: b1≠ 0. Our confidence interval was 95%.
+
+We constructed the following hypothesis test to determine whether there is a linear relationship: H~0: b1 = 0, HA: b1 ≠ 0. Our confidence interval was 95%.
+
 ## Results
 We obtained a p-value of 1.696e-08. This indicates a linear relationship, as we are able to reject the null hypothesis that b1= 0. Therefore, we can accept our b1 value of -.043. We can expect with 95% confidence that our estimator b0 falls within the range [0.475,0.781] and that b1 is within the range [-0.057, -0.028].
 
@@ -127,8 +148,8 @@ ggplot(data = both, aes(x = X2014.log10, y = Mort.Rate)) +
                      aes(label = paste(..eq.label.., ..rr.label.., 
                                        sep = "*plain(\",\")~~~")),
                      parse = TRUE) +
-        labs(title = 'Adult Mortality Rate according to Annual GDP Growth (2014)', 
-             x = 'Annual GDP Growth',
+        labs(title = 'Adult Mortality Rate according to Annual GDP (2014)', 
+             x = 'Annual GDP',
              y = 'Adult Mortality Rate') + 
         theme(axis.title.x = element_text(), 
               axis.title.y.left = element_text(vjust = 3),
@@ -142,6 +163,6 @@ confint(both.lm.logX)
 ```
 
 ## Discussion/Conclusions
-Our results are inconclusive. Based on our results and the p-value found for our plot of X vs Y, we can conclude that there is a linear relationship between a country’s 2014 Annual GDP Growth and it’s adult mortality rate. More specifically, there is a negative linear relationship, in that mortality rate decreases for higher annual GDP. However, in our X vs residuals plot, we obtained a p-value that is too high for us to be able to reject the null hypothesis so the Shapiro-Wilks test does not give us sufficient evidence to back up the linear relationship between annual GDP and mortality rate. Responding to our original research questions, there is not sufficient evidence of a linear relationship between a country’s 2014 Annual GDP Growth and its adult mortality rate for the same year. Based on our model, though, we would expect the adult mortality rate for a country with an annual GDP of $billion USD to be 0.413.
+Our results are inconclusive. Based on our results and the p-value found for our plot of X vs Y, we can obtain that there is a linear relationship between a country’s 2014 Annual GDP and its adult mortality rate. More specifically, there is a negative linear relationship, in that, we can expect a country's average adult mortality rate to decrease, on average, as annual GDP increases for these particular datasets. However, in our X vs residuals plot, we obtained a p-value that is too high for us to be able to reject the null hypothesis, so the Shapiro-Wilks test does not give us sufficient evidence to back up the linear relationship between annual GDP and mortality rate as normality fails to hold. Responding to our original research questions, there is insufficient evidence of a linear relationship between a country’s 2014 Annual GDP and its adult mortality rate for the same year.
 
 
