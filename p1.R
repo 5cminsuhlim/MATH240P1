@@ -162,6 +162,9 @@ confint(both.lm.logX)
 
 
 
+
+
+
 ## TRANSFORMATION 
 ## CUBEROOT X, SQRT Y
 both.lm.cubertX.sqrtY <- lm(sqrt(Mort.Rate) ~ X2014.CubeRoot, data = both)
@@ -198,12 +201,13 @@ qqline(both.lm.cubertX.sqrtY$residuals, col = 'red')
 
 
 
-## analysis male
-male.lm = lm(Mort.Rate ~ X2014, data = male)
+## analysis male log10
+male <- mutate(male, X2014.log10 = log10(X2014)) #cuberoot(X2014))
+male.lm <- lm(Mort.Rate ~ X2014.log10, data = male)
 summary(male.lm)
 
 ## linear plot
-ggplot(data = male, aes(x = X2014, y = Mort.Rate)) +
+ggplot(data = male, aes(x = X2014.log10, y = Mort.Rate)) +
         geom_point(color = 'darkgreen', size = 0.7) +
         geom_smooth(method = lm, se = TRUE, fullrange = TRUE, level = 0.95,
                     color = 'darkred', fill = 'blue') +
@@ -304,12 +308,13 @@ qqline(male.lm.cubertX.sqrtY$residuals, col = 'red')
 
 
 
-## analysis female
-female.lm = lm(Mort.Rate ~ X2014, data = female)
+## analysis female log10
+female <- mutate(female, X2014.log10 = log10(X2014)) #cuberoot(X2014))
+female.lm <- lm(Mort.Rate ~ X2014.log10, data = female)
 summary(female.lm)
 
 ## linear plot
-ggplot(data = female, aes(x = X2014, y = Mort.Rate)) +
+ggplot(data = female, aes(x = X2014.log10, y = Mort.Rate)) +
         geom_point(color = 'darkgreen', size = 0.7) +
         geom_smooth(method = lm, se = TRUE, fullrange = TRUE, level = 0.95,
                     color = 'darkred', fill = 'blue') +
